@@ -5,6 +5,7 @@ import pickle
 
 import pandas as pd
 from sklearn.metrics import accuracy_score
+from sklearn.preprocessing import OneHotEncoder
 
 
 def load_estimator():
@@ -24,11 +25,18 @@ def load_datasets():
     train_dataset = pd.read_csv("train_dataset.csv")
     test_dataset = pd.read_csv("test_dataset.csv")
 
+    
+    
+
     x_train = train_dataset.drop("type", axis=1)
     y_train = train_dataset["type"]
 
     x_test = test_dataset.drop("type", axis=1)
     y_test = test_dataset["type"]
+
+    encoder = OneHotEncoder()
+    x_train = encoder.fit_transform(x_train)
+    x_test = encoder.transform(x_test)
 
     return x_train, x_test, y_train, y_test
 
@@ -40,18 +48,52 @@ def eval_metrics(y_true, y_pred):
 
     return accuracy
 
-
 def compute_metrics():
     """Compute model metrics."""
 
     estimator = load_estimator()
     assert estimator is not None, "Model not found"
 
+    x_train, x_test, y_true_train, y_true_test = load_datasets()
 
+    y_pred_train = estimator.predict(x_train)
+    y_pred_test = estimator.predict(x_test)
+
+    accuracy_train = eval_metrics(y_true_train, y_pred_train)
+    accuracy_test = eval_metrics(y_true_test, y_pred_test)
+
+    return accuracy_train, accuracy_test
+
+def run_grading():
+    """Run grading script."""
+
+    accuracy_train, accuracy_test = compute_metrics()
+
+    assert accuracy_train > 0.99
+    assert accuracy_test > 0.99
+
+
+if __name__ == "__main__":
+    run_grading()
+
+"""
+def compute_metrics():
+
+    estimator = load_estimator()
+    assert estimator is not None, "Model not found"
+
+    def run_grading():
+
+    accuracy_train, accuracy_test = compute_metrics()
+
+    print(accuracy_test, accuracy_train)
+
+    
+    
     if __name__ == "__main__":
         run_grading()
         
-
+        print("XDDDDDDDDDDDD")
         x_train, x_test, y_true_train, y_true_test = load_datasets()
 
         y_pred_train = estimator.predict(x_train)
@@ -61,12 +103,5 @@ def compute_metrics():
         accuracy_test = eval_metrics(y_true_test, y_pred_test)
 
         return accuracy_train, accuracy_test
+"""
 
-
-def run_grading():
-    """Run grading script."""
-
-    accuracy_train, accuracy_test = compute_metrics()
-
-    assert accuracy_train > 0.99
-    assert accuracy_test > 0.99
